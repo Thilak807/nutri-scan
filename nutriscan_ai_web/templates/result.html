@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Results | NutriScan AI{% endblock %}
+
+{% block content %}
+<section class="row g-4">
+    <div class="col-lg-5">
+        <div class="panel-card p-4 h-100">
+            <h1 class="h3 mb-3">Detected Food</h1>
+            <p class="detected-food mb-3">{{ detected_food }}</p>
+
+            {% if image_url %}
+                <img src="{{ image_url }}" alt="Uploaded food" class="result-image mb-3">
+            {% endif %}
+
+            {% if prediction %}
+                <p class="small text-secondary mb-2">
+                    Model: {{ prediction.source }}
+                    | Confidence: {{ '%.1f'|format(prediction.confidence * 100) }}%
+                </p>
+                <ul class="list-group list-group-flush rounded">
+                    {% for name, score in prediction.candidates %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ name }}</span>
+                            <span class="badge text-bg-light">{{ '%.1f'|format(score * 100) }}%</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="panel-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h4 mb-0">Health Rating</h2>
+                <span class="badge text-bg-{{ health.color }} fs-6 px-3 py-2">
+                    {{ health.label }} ({{ health.score }}/100)
+                </span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Health score">
+                <div class="progress-bar bg-{{ health.color }}" data-score="{{ health.score }}"></div>
+            </div>
+            <p class="small text-secondary mt-2 mb-0">Nutrition source: {{ nutrition.source }}</p>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <article class="nutrition-card">
+                    <p>Calories</p>
+                    <h3>{{ nutrition.calories }}</h3>
+                    <small>kcal / 100g</small>
+                </article>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <article class="nutrition-card">
+                    <p>Protein</p>
+                    <h3>{{ nutrition.protein }}</h3>
+                    <small>g</small>
+                </article>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <article class="nutrition-card">
+                    <p>Carbs</p>
+                    <h3>{{ nutrition.carbohydrates }}</h3>
+                    <small>g</small>
+                </article>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <article class="nutrition-card">
+                    <p>Fats</p>
+                    <h3>{{ nutrition.fats }}</h3>
+                    <small>g</small>
+                </article>
+            </div>
+        </div>
+
+        <div class="panel-card p-4">
+            <h2 class="h5 mb-3">Dietary Suggestions</h2>
+            <ul class="mb-3">
+                {% for suggestion in suggestions %}
+                    <li class="mb-2">{{ suggestion }}</li>
+                {% endfor %}
+            </ul>
+            <p class="small text-secondary mb-0">Vitamins: {{ nutrition.vitamins }}</p>
+        </div>
+    </div>
+</section>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    <a href="{{ url_for('upload_page') }}" class="btn btn-accent">Analyze Another</a>
+    <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-dark">Open Admin Dashboard</a>
+</div>
+{% endblock %}

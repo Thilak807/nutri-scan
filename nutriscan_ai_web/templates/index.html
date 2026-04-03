@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}NutriScan AI | Smarter Food Decisions{% endblock %}
+
+{% block content %}
+<section class="hero-card p-4 p-md-5 mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <p class="eyebrow mb-2">AI-powered nutrition intelligence</p>
+            <h1 class="display-5 hero-title mb-3">Understand your food before your first bite.</h1>
+            <p class="lead text-secondary mb-4">
+                Upload a meal photo or type a food name. NutriScan AI predicts the item,
+                fetches nutrition facts, scores health impact, and gives actionable dietary advice.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('upload_page') }}" class="btn btn-accent btn-lg">
+                    <i class="bi bi-camera"></i>
+                    Start Analysis
+                </a>
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-dark btn-lg">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    View Admin Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="stack-cards">
+                <article class="feature-card">
+                    <h3><i class="bi bi-image"></i> Image to Food Name</h3>
+                    <p>MobileNetV2 predicts likely food labels from uploaded images.</p>
+                </article>
+                <article class="feature-card">
+                    <h3><i class="bi bi-heart-pulse"></i> Health Scoring</h3>
+                    <p>Calories, sugar, sodium, fiber, and protein are converted to a health rating.</p>
+                </article>
+                <article class="feature-card">
+                    <h3><i class="bi bi-lightbulb"></i> Smart Suggestions</h3>
+                    <p>Context-aware tips help users improve food choices over time.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="row g-3 g-md-4">
+    <div class="col-md-4">
+        <div class="metric-card">
+            <span class="metric-icon"><i class="bi bi-lightning"></i></span>
+            <h4>Fast Result Loop</h4>
+            <p>Analyze and view insights in seconds with a single submission form.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <span class="metric-icon"><i class="bi bi-phone"></i></span>
+            <h4>Mobile-Ready UI</h4>
+            <p>Responsive layout with touch-friendly controls and readable cards.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <span class="metric-icon"><i class="bi bi-database-check"></i></span>
+            <h4>History Tracking</h4>
+            <p>Every query can be stored in SQLite for trends and admin analytics.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

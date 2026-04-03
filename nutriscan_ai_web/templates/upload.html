@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Analyze Food | NutriScan AI{% endblock %}
+
+{% block content %}
+<section class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="panel-card p-4 p-md-5">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Analyze Food</h1>
+                    <p class="text-secondary mb-0">Upload an image or enter a food name manually.</p>
+                </div>
+                <span class="badge text-bg-light">AI + Nutrition API</span>
+            </div>
+
+            <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="row g-4">
+                <div class="col-12">
+                    <label for="food_image" class="form-label fw-semibold">Food Image</label>
+                    <div id="dropzone" class="dropzone">
+                        <input type="file" class="form-control visually-hidden" id="food_image" name="food_image" accept="image/*">
+                        <div class="text-center">
+                            <i class="bi bi-cloud-arrow-up display-5 mb-2"></i>
+                            <p class="mb-1 fw-semibold">Drag and drop an image here</p>
+                            <p class="text-secondary small mb-2">or click to browse</p>
+                            <span id="fileLabel" class="small text-muted">No image selected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-center text-secondary small my-1">OR</div>
+                </div>
+
+                <div class="col-12">
+                    <label for="image_url" class="form-label fw-semibold">Image URL</label>
+                    <input
+                        type="url"
+                        id="image_url"
+                        name="image_url"
+                        class="form-control"
+                        placeholder="Paste a direct image link (e.g., from Google Images)"
+                    >
+                    <div class="form-text">Use a direct image URL ending in .jpg, .png, or .webp when possible.</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-center text-secondary small my-1">OR</div>
+                </div>
+
+                <div class="col-12">
+                    <label for="food_name" class="form-label fw-semibold">Food Name</label>
+                    <input
+                        type="text"
+                        id="food_name"
+                        name="food_name"
+                        class="form-control form-control-lg"
+                        placeholder="Examples: banana, grilled chicken, pizza"
+                    >
+                </div>
+
+                <div class="col-12 d-grid d-md-flex justify-content-md-end">
+                    <button class="btn btn-accent btn-lg px-4" type="submit">
+                        <i class="bi bi-stars"></i>
+                        Analyze Nutrition
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

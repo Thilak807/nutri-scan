@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard | NutriScan AI{% endblock %}
+
+{% block content %}
+<section class="mb-4">
+    <h1 class="h2 mb-1">Admin Dashboard</h1>
+    <p class="text-secondary mb-0">Usage trends and latest user nutrition queries.</p>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <article class="metric-card h-100">
+            <h6>Total Queries</h6>
+            <p class="metric-value">{{ analytics.total_queries }}</p>
+        </article>
+    </div>
+    <div class="col-md-3 col-6">
+        <article class="metric-card h-100">
+            <h6>Image Queries</h6>
+            <p class="metric-value">{{ analytics.image_queries }}</p>
+        </article>
+    </div>
+    <div class="col-md-3 col-6">
+        <article class="metric-card h-100">
+            <h6>Text Queries</h6>
+            <p class="metric-value">{{ analytics.text_queries }}</p>
+        </article>
+    </div>
+    <div class="col-md-3 col-6">
+        <article class="metric-card h-100">
+            <h6>Top Food</h6>
+            <p class="metric-value small-title">{{ analytics.top_food }}</p>
+        </article>
+    </div>
+</section>
+
+<section class="panel-card p-4">
+    <h2 class="h5 mb-3">Recent Activity</h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>Input</th>
+                    <th>Detected Food</th>
+                    <th>Calories</th>
+                    <th>Health</th>
+                    <th>Timestamp (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if history %}
+                    {% for row in history %}
+                        <tr>
+                            <td>{{ row.id }}</td>
+                            <td><span class="badge text-bg-light">{{ row.query_type }}</span></td>
+                            <td>{{ row.input_text }}</td>
+                            <td>{{ row.detected_food }}</td>
+                            <td>{{ row.calories }}</td>
+                            <td>{{ row.health_rating }}</td>
+                            <td>{{ row.created_at }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-secondary py-4">No activity yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
