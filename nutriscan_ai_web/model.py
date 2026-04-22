@@ -1,10 +1,12 @@
 import os
 from typing import Dict, List, Tuple
 import importlib
+import logging
 
 import numpy as np
 
 TENSORFLOW_AVAILABLE = False
+logger = logging.getLogger(__name__)
 
 
 class FoodClassifier:
@@ -70,10 +72,14 @@ class FoodClassifier:
         self._image_module = None
         self._decode_predictions = None
         self._preprocess_input = None
-        self._load_backend()
+        self._backend_attempted = False
 
     def _load_backend(self) -> None:
         global TENSORFLOW_AVAILABLE
+        if self._backend_attempted:
+            return
+
+        self._backend_attempted = True
         try:
             self._mobilenet_module = importlib.import_module(
                 "tensorflow.keras.applications.mobilenet_v2"
@@ -83,6 +89,11 @@ class FoodClassifier:
             self._preprocess_input = getattr(self._mobilenet_module, "preprocess_input")
             self.model = getattr(self._mobilenet_module, "MobileNetV2")(weights="imagenet")
             TENSORFLOW_AVAILABLE = True
+        except KeyboardInterrupt:
+            # If model loading is interrupted, continue with filename fallback mode.
+            TENSORFLOW_AVAILABLE = False
+            self.model = None
+            logger.warning("Model loading interrupted. Running in fallback mode.")
         except Exception:
             TENSORFLOW_AVAILABLE = False
             self.model = None
@@ -123,6 +134,8 @@ class FoodClassifier:
 
     def predict_food(self, image_path: str, top_k: int = 3) -> Dict:
         """Return normalized food prediction details for a given image."""
+        self._load_backend()
+
         if not self.model or not TENSORFLOW_AVAILABLE:
             return self._fallback_from_filename(image_path)
 

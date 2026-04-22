@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from model import FoodClassifier
 from utils import (
     calculate_health_rating,
+    extract_product_nutrition_from_image,
     fetch_nutrition_data,
     generate_dietary_suggestions,
     get_recent_history,
@@ -56,6 +57,40 @@ def save_image_from_url(image_url: str) -> Path:
     return save_path
 
 
+def infer_consumable_name(prediction_details: dict) -> str:
+    """Infer a consumable keyword when the model predicts packaging/non-food labels."""
+    if not prediction_details:
+        return ""
+
+    possible_terms = set()
+
+    raw_label = prediction_details.get("raw_label")
+    if raw_label:
+        possible_terms.add(str(raw_label).lower())
+
+    for name, _ in prediction_details.get("candidates", []):
+        possible_terms.add(str(name).lower())
+
+    for name, _ in prediction_details.get("raw_candidates", []):
+        possible_terms.add(str(name).lower())
+
+    keyword_map = {
+        "coca cola": ["coke", "cola", "soda", "soft drink"],
+        "orange juice": ["juice", "fruit drink", "lemonade", "smoothie"],
+        "potato chips": ["chips", "crisps", "snack packet"],
+        "chocolate bar": ["chocolate", "candy bar"],
+        "instant noodles": ["noodle cup", "instant noodle", "ramen cup"],
+        "packaged drink": ["beverage", "drink", "bottle", "can", "carton"],
+    }
+
+    for target, keywords in keyword_map.items():
+        for term in possible_terms:
+            if any(keyword in term for keyword in keywords):
+                return target
+
+    return ""
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -74,6 +109,7 @@ def analyze():
 
     detected_food = ""
     prediction_details = None
+    ocr_nutrition = {}
     image_url = None
     query_type = "text"
     input_text = food_name
@@ -90,7 +126,10 @@ def analyze():
         file.save(save_path)
 
         prediction_details = classifier.predict_food(str(save_path))
+        ocr_nutrition = extract_product_nutrition_from_image(str(save_path))
         detected_food = prediction_details.get("food_name", "")
+        if not detected_food and ocr_nutrition:
+            detected_food = ocr_nutrition.get("food_name", "")
         image_url = url_for("static", filename=f"uploads/{filename}")
         query_type = "image"
         input_text = safe_name
@@ -102,18 +141,30 @@ def analyze():
             return redirect(url_for("upload_page"))
 
         prediction_details = classifier.predict_food(str(save_path))
+        ocr_nutrition = extract_product_nutrition_from_image(str(save_path))
         detected_food = prediction_details.get("food_name", "")
+        if not detected_food and ocr_nutrition:
+            detected_food = ocr_nutrition.get("food_name", "")
         image_url = url_for("static", filename=f"uploads/{save_path.name}")
         query_type = "image_url"
         input_text = image_url_input
 
-    if prediction_details and not prediction_details.get("is_food", True) and not food_name:
-        label = prediction_details.get("raw_label", "unknown object")
-        flash(
-            f"The uploaded image looks like '{label}', not food. Enter a food name manually or upload a clearer food photo.",
-            "warning",
-        )
-        return redirect(url_for("upload_page"))
+    if (
+        prediction_details
+        and not prediction_details.get("is_food", True)
+        and not food_name
+        and not ocr_nutrition
+    ):
+        inferred_food = infer_consumable_name(prediction_details)
+        if inferred_food:
+            detected_food = inferred_food
+        else:
+            label = prediction_details.get("raw_label", "unknown object")
+            flash(
+                f"The uploaded image looks like '{label}', not food. Enter a food or product name manually or upload a clearer image.",
+                "warning",
+            )
+            return redirect(url_for("upload_page"))
 
     if food_name and not detected_food:
         detected_food = food_name
@@ -122,7 +173,15 @@ def analyze():
         flash("Please upload an image or type a food name to continue.", "warning")
         return redirect(url_for("upload_page"))
 
-    nutrition = fetch_nutrition_data(detected_food)
+    if ocr_nutrition:
+        nutrition = ocr_nutrition
+        if food_name:
+            nutrition["food_name"] = food_name.title()
+        elif detected_food:
+            nutrition["food_name"] = detected_food.title()
+    else:
+        nutrition = fetch_nutrition_data(detected_food)
+
     health = calculate_health_rating(nutrition)
     suggestions = generate_dietary_suggestions(nutrition, health)
 

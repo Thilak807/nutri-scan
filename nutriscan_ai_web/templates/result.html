@@ -48,7 +48,7 @@
                 <article class="nutrition-card">
                     <p>Calories</p>
                     <h3>{{ nutrition.calories }}</h3>
-                    <small>kcal / 100g</small>
+                    <small>kcal {{ nutrition.serving_basis or '/ 100g' }}</small>
                 </article>
             </div>
             <div class="col-sm-6 col-lg-3">
